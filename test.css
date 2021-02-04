@@ -52,6 +52,7 @@ p {
 
 body {
     background-color: pink;
+    background-image: url("https://skoy;-to-tam");
 }
 
 @media (min-width: 30em) {
@@ -59,3 +60,5 @@ body {
         background-color: blue;
     }
 }
+
+@charset "Big5";
