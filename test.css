@@ -10,7 +10,6 @@ comment
 /*Какой-то коммент на русском*/
 
 
-
 @media (min-width: 30em) {
     body {
         background-color: /*comment*/ blue;
@@ -19,10 +18,7 @@ comment
 }
 
 .cl {
-    margin: 10px
-5px
-    5px
-    0px;
+    margin: 10px 5px 5px 0px;
 }
 
 @media handheld {
@@ -59,6 +55,27 @@ body {
     body {
         background-color: blue;
     }
+}
+
+@document url("http://doc.ru") {
+
+    @media (min-width: 777em) {
+        body {
+            background-color: blue;
+        }
+    }
+
+    @media (min-width: 888px) {
+        body {
+            background-color: yellow;
+        }
+    }
+
+    head {
+        color: gray;
+    }
+
+    @charset "Big5";
 }
 
 @charset "Big5";

@@ -32,6 +32,7 @@
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="TEXT" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/main/main.go" />
   </component>
@@ -60,22 +61,22 @@
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
     <state x="743" y="323" width="434" height="488" key="FileChooserDialogImpl/0.27.1920.1053@0.27.1920.1053" timestamp="1612391637078" />
-    <state width="1878" height="322" key="GridCell.Tab.0.bottom" timestamp="1612480815937">
+    <state width="1878" height="729" key="GridCell.Tab.0.bottom" timestamp="1612565910086">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state width="1878" height="322" key="GridCell.Tab.0.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1612480815937" />
-    <state width="1878" height="322" key="GridCell.Tab.0.center" timestamp="1612480815936">
+    <state width="1878" height="729" key="GridCell.Tab.0.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1612565910085" />
+    <state width="1878" height="729" key="GridCell.Tab.0.center" timestamp="1612565910085">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state width="1878" height="322" key="GridCell.Tab.0.center/0.27.1920.1053@0.27.1920.1053" timestamp="1612480815936" />
-    <state width="1878" height="322" key="GridCell.Tab.0.left" timestamp="1612480815936">
+    <state width="1878" height="729" key="GridCell.Tab.0.center/0.27.1920.1053@0.27.1920.1053" timestamp="1612565910085" />
+    <state width="1878" height="729" key="GridCell.Tab.0.left" timestamp="1612565910085">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state width="1878" height="322" key="GridCell.Tab.0.left/0.27.1920.1053@0.27.1920.1053" timestamp="1612480815936" />
-    <state width="1878" height="322" key="GridCell.Tab.0.right" timestamp="1612480815936">
+    <state width="1878" height="729" key="GridCell.Tab.0.left/0.27.1920.1053@0.27.1920.1053" timestamp="1612565910085" />
+    <state width="1878" height="729" key="GridCell.Tab.0.right" timestamp="1612565910085">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state width="1878" height="322" key="GridCell.Tab.0.right/0.27.1920.1053@0.27.1920.1053" timestamp="1612480815936" />
+    <state width="1878" height="729" key="GridCell.Tab.0.right/0.27.1920.1053@0.27.1920.1053" timestamp="1612565910085" />
     <state x="623" y="256" width="672" height="678" key="search.everywhere.popup" timestamp="1612395360758">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>

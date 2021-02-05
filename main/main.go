@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"git.ash.lt/allrss/cssparser/parser"
 	"io/ioutil"
 	"log"
@@ -19,4 +21,7 @@ func main() {
 	}
 
 	log.Println(style)
+
+	s, _ := json.MarshalIndent(style, "", "\t")
+	fmt.Println(string(s))
 }
