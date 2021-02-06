@@ -2,31 +2,26 @@ package parser
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"strings"
 )
 
-func Parse(string_css string) (stylesheet StyleSheet, err error) {
+func Parse(string_css string) (cssStruct CSSStruct, err error) {
 	//Сразу сделаем trim
-	string_css=strings.Trim(string_css," \r\n")
+	string_css = strings.Trim(string_css, " \r\n")
 
-	fmt.Println("Will parse: ",string_css)
+	//fmt.Println("Will parse: ", string_css)
 
-	atsInherited := make([]StyleSheet, 0)
-	blocks := make([]Block, 0)
-	ats := make([]string, 0)
-	imports := make([]string, 0)
+	cssElements := []CSSElement{}
 
 	runes := []rune(string_css)
 
-	var inside_comment bool = false
+	var inside_comment = false
 	var inside_string rune = 0
-	var inside_bracket int = 0
+	var inside_bracket = 0
 
-	var curr_block []rune = []rune{}
+	var curr_block = []rune{}
 
-	var comment_block []rune = make([]rune, 0)
+	var comment_block = make([]rune, 0)
 
 	for i := 0; i < len(runes); i++ {
 		cur_rune := runes[i]
@@ -73,7 +68,7 @@ func Parse(string_css string) (stylesheet StyleSheet, err error) {
 		}
 
 		//Если попали на второй подряд пробел, пропускаем
-		if inside_string == 0 && cur_rune == ' ' && (len(curr_block)==0 || curr_block[len(curr_block)-1] == ' ' ) {
+		if inside_string == 0 && cur_rune == ' ' && (len(curr_block) == 0 || curr_block[len(curr_block)-1] == ' ') {
 			continue
 		}
 
@@ -89,46 +84,46 @@ func Parse(string_css string) (stylesheet StyleSheet, err error) {
 		if inside_string == 0 && cur_rune == '}' {
 			inside_bracket--
 			if inside_bracket < 0 {
-				return StyleSheet{}, errors.New("Failed parse css - negative number of strings")
+				return CSSStruct{}, errors.New("Failed parse css - negative number of strings")
 			}
 
 		}
 
 		if (inside_string == 0 && cur_rune == '}' && inside_bracket == 0) ||
 			(inside_bracket == 0 && cur_rune == ';') {
-			//fmt.Println("Block: ", string(curr_block))
+			//fmt.Println("RuleSet: ", string(curr_block))
 
 			curr_block = []rune(strings.Trim(string(curr_block), " "))
 
 			if curr_block[0] == '@' {
 				if strings.HasPrefix(string(curr_block), "@media") ||
-					strings.HasPrefix(string(curr_block), "@supports")  ||
-					strings.HasPrefix(string(curr_block), "@document")  {
-					atInherited, err := parseAtInherited(curr_block)
+					strings.HasPrefix(string(curr_block), "@supports") ||
+					strings.HasPrefix(string(curr_block), "@document") {
+					cssStr, err := parseCSSStruct(curr_block)
 					if err != nil {
-						return StyleSheet{}, errors.New("Error while parse atInherited " + string(curr_block) + ": " + err.Error())
+						return CSSStruct{}, errors.New("Error while parse atInherited " + string(curr_block) + ": " + err.Error())
 					}
-					atsInherited = append(atsInherited, atInherited)
+					cssElements = append(cssElements, cssStr)
 				} else if strings.HasPrefix(string(curr_block), "@import") {
 					imp, err := parseImport(curr_block)
 					if err != nil {
-						return StyleSheet{}, errors.New("Error while parse import " + string(curr_block) + ": " + err.Error())
+						return CSSStruct{}, errors.New("Error while parse import " + string(curr_block) + ": " + err.Error())
 					}
-					imports = append(imports, imp)
+					cssElements = append(cssElements, imp)
 				} else {
 					at, err := parseAt(curr_block)
 					if err != nil {
-						return StyleSheet{}, errors.New("Error while parse at " + string(curr_block) + ": " + err.Error())
+						return CSSStruct{}, errors.New("Error while parse at " + string(curr_block) + ": " + err.Error())
 					}
-					ats = append(ats, at)
+					cssElements = append(cssElements, at)
 				}
 			} else {
-				block, err := parseBlock(curr_block)
+				ruleSet, err := parseRuleSet(curr_block)
 				if err != nil {
-					return StyleSheet{}, errors.New("Error while parse block " + string(curr_block) + ": " + err.Error())
+					return CSSStruct{}, errors.New("Error while parse ruleSet " + string(curr_block) + ": " + err.Error())
 				}
-				log.Println(block)
-				blocks = append(blocks, block)
+				//log.Println(ruleSet)
+				cssElements = append(cssElements, ruleSet)
 			}
 
 			curr_block = []rune{}
@@ -136,14 +131,15 @@ func Parse(string_css string) (stylesheet StyleSheet, err error) {
 		}
 	}
 
-	return StyleSheet{Selector: "", AtsInherited: atsInherited, Blocks: blocks, Imports: imports}, nil
+	return CSSStruct{Selector: "", Childs: cssElements}, nil
 }
 
-func parseAt(runes []rune) (at string, err error) {
-	fmt.Println("At: ", string(runes))
-	return string(at), nil
+func parseAt(runes []rune) (at AtRule, err error) {
+	str := strings.Trim(string(runes), "; ")
+	//fmt.Println("At: ", string(runes))
+	return AtRule(str), nil
 }
-func parseImport(runes []rune) (imp string, err error) {
+func parseImport(runes []rune) (imp Import, err error) {
 	tmp_imp := string(runes)
 	space_idx := strings.Index(tmp_imp, " ")
 	if space_idx == -1 {
@@ -160,12 +156,12 @@ func parseImport(runes []rune) (imp string, err error) {
 
 	tmp_url = strings.Trim(tmp_url, "'\"")
 
-	fmt.Println("Import: ", tmp_url)
+	//fmt.Println("Import: ", tmp_url)
 
-	return tmp_url, nil
+	return Import(tmp_url), nil
 }
 
-func parseBlock(runes []rune) (block Block, err error) {
+func parseRuleSet(runes []rune) (block RuleSet, err error) {
 	rules := make([]Rule, 0)
 
 	tmp_block := string(runes)
@@ -173,7 +169,7 @@ func parseBlock(runes []rune) (block Block, err error) {
 	br_idx := strings.Index(tmp_block, "{")
 
 	if br_idx == -1 {
-		return Block{}, errors.New("Can not find left bracket on css block")
+		return RuleSet{}, errors.New("Can not find left bracket on css block")
 	}
 
 	sel := strings.Trim(tmp_block[:br_idx], " ")
@@ -181,7 +177,7 @@ func parseBlock(runes []rune) (block Block, err error) {
 	lbr_idx := strings.LastIndex(tmp_block, "}")
 
 	if lbr_idx == -1 {
-		return Block{}, errors.New("Can not find right bracket on css block")
+		return RuleSet{}, errors.New("Can not find right bracket on css block")
 	}
 
 	cont := strings.Trim(tmp_block[br_idx+1:lbr_idx], " ;")
@@ -192,7 +188,7 @@ func parseBlock(runes []rune) (block Block, err error) {
 		if inside_string == 0 && r == ';' {
 			rule, err := parseRule(buff)
 			if err != nil {
-				return Block{}, errors.New("Rule error: " + err.Error())
+				return RuleSet{}, errors.New("Rule error: " + err.Error())
 			}
 			rules = append(rules, rule)
 
@@ -209,24 +205,24 @@ func parseBlock(runes []rune) (block Block, err error) {
 		if i == len(cont)-1 {
 			rule, err := parseRule(buff)
 			if err != nil {
-				return Block{}, errors.New("Rule error: " + err.Error())
+				return RuleSet{}, errors.New("Rule error: " + err.Error())
 			}
 			rules = append(rules, rule)
 		}
 	}
 
-	return Block{Selector: sel, Rules: rules}, nil
+	return RuleSet{Selector: sel, Rules: rules}, nil
 }
 
-func parseAtInherited(runes []rune) (atInherited StyleSheet, err error) {
-	fmt.Println("AtInherited: ", string(runes))
+func parseCSSStruct(runes []rune) (cssStruct CSSStruct, err error) {
+	//fmt.Println("CSSStruct: ", string(runes))
 
 	tmp_block := string(runes)
 
 	br_idx := strings.Index(tmp_block, "{")
 
 	if br_idx == -1 {
-		return StyleSheet{}, errors.New("Can not find left bracket on css block")
+		return CSSStruct{}, errors.New("Can not find left bracket on css block")
 	}
 
 	sel := strings.Trim(tmp_block[:br_idx], " ")
@@ -234,18 +230,16 @@ func parseAtInherited(runes []rune) (atInherited StyleSheet, err error) {
 	lbr_idx := strings.LastIndex(tmp_block, "}")
 
 	if lbr_idx == -1 {
-		return StyleSheet{}, errors.New("Can not find right bracket on css block")
+		return CSSStruct{}, errors.New("Can not find right bracket on css block")
 	}
 
 	cont := strings.Trim(tmp_block[br_idx+1:lbr_idx], " ;")
 
-	fmt.Println("AT SEL: ",sel,", conf: ",cont)
-	atInherited,err=Parse(cont)
+	//fmt.Println("AT SEL: ", sel, ", conf: ", cont)
+	cssStruct, err = Parse(cont)
 
-
-
-	fmt.Println("AT: ", atInherited)
-	atInherited.Selector = sel
+	//fmt.Println("AT: ", cssStruct)
+	cssStruct.Selector = sel
 	return
 
 }
@@ -260,6 +254,6 @@ func parseRule(runes []rune) (rule Rule, err error) {
 	sel := strings.Trim(tmp_rule[0:sep_idx], " ")
 	val := strings.Trim(tmp_rule[sep_idx+1:], " ")
 
-	fmt.Println("rule parts: " + sel + "<->" + val + "<->")
+	//fmt.Println("rule parts: " + sel + "<->" + val + "<->")
 	return Rule{Name: sel, Value: val}, nil
 }
