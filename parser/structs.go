@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"reflect"
 	"strings"
 	"sync"
 )
@@ -33,27 +34,32 @@ type RuleSet struct {
 	Mux      sync.Mutex
 }
 
-func (rs RuleSet) getType() CSSType {
+func (rs *RuleSet) getType() CSSType {
 	return CSSType_Ruleset
 }
 
-func (rs RuleSet) getChilds() *[]CSSElement {
+func (rs *RuleSet) getChilds() []CSSElement {
 	return nil
 }
 
-func (rs RuleSet) getValue() interface{} {
+func (rs *RuleSet) getValue() interface{} {
 	return rs.Rules
 }
 
-func (rs RuleSet) String() (res string) {
+func (rs *RuleSet) String() (res string) {
 	res = "Ruleset (" + rs.Selector + ")\n"
+	if rs.Parent != nil {
+		res += " Parent: " + reflect.TypeOf(*rs.Parent).String() + ", sel: " + rs.Parent.Selector + "\n"
+	} else {
+		res += " Parent is NIL\n"
+	}
 	for _, r := range rs.Rules {
 		res += TAB_SYMBOL + "Rule: " + r.Name + "->" + r.Value + "\n"
 	}
 	return res
 }
 
-func (rs RuleSet) StringCSS() (res string) {
+func (rs *RuleSet) StringCSS() (res string) {
 	res = rs.Selector + "{\n"
 	for _, r := range rs.Rules {
 		res += TAB_SYMBOL + r.Name + ": " + r.Value + ";\n"
@@ -67,23 +73,23 @@ type Import struct {
 	Parent *CSSStruct
 }
 
-func (i Import) getType() CSSType {
+func (i *Import) getType() CSSType {
 	return CSSType_Import
 }
 
-func (i Import) getChilds() *[]CSSElement {
+func (i *Import) getChilds() []CSSElement {
 	return nil
 }
 
-func (i Import) getValue() interface{} {
+func (i *Import) getValue() interface{} {
 	return i.Value
 }
 
-func (i Import) String() (res string) {
+func (i *Import) String() (res string) {
 	return "Import: " + i.Value
 }
 
-func (i Import) StringCSS() (res string) {
+func (i *Import) StringCSS() (res string) {
 	return "@import \"" + i.Value + "\";\n"
 }
 
@@ -91,30 +97,30 @@ func (i Import) StringCSS() (res string) {
 //Либо At-правило, предполагающее вложенность
 type CSSStruct struct {
 	Selector string
-	Childs   *[]CSSElement
+	Childs   []CSSElement
 	Parent   *CSSStruct
 }
 
-func (ai CSSStruct) getType() CSSType {
+func (ai *CSSStruct) getType() CSSType {
 	return CSSType_AtInherited
 }
 
-func (ai CSSStruct) getChilds() *[]CSSElement {
+func (ai *CSSStruct) getChilds() []CSSElement {
 	return ai.Childs
 }
 
-func (ai CSSStruct) getValue() interface{} {
+func (ai *CSSStruct) getValue() interface{} {
 	return ai.Selector
 }
 
-func (ai CSSStruct) String() (res string) {
+func (ai *CSSStruct) String() (res string) {
 	if ai.Selector == "" {
 		res = "Root: \n"
 	} else {
 		res = "CSSStruct: (" + ai.Selector + ")\n"
 	}
 
-	for _, r := range *ai.getChilds() {
+	for _, r := range ai.getChilds() {
 		res += "-"
 		for _, s := range strings.Split(r.String(), "\n") {
 			res += TAB_SYMBOL + s + "\n"
@@ -123,13 +129,13 @@ func (ai CSSStruct) String() (res string) {
 	return res
 }
 
-func (ai CSSStruct) StringCSS() (res string) {
+func (ai *CSSStruct) StringCSS() (res string) {
 	need_tab := ""
 	if ai.Selector != "" {
 		need_tab = TAB_SYMBOL
 		res = ai.Selector + " {\n"
 	}
-	for _, r := range *ai.getChilds() {
+	for _, r := range ai.getChilds() {
 		for _, s := range strings.Split(r.StringCSS(), "\n") {
 			res += need_tab + s + "\n"
 		}
@@ -145,23 +151,23 @@ type AtRule struct {
 	Parent *CSSStruct
 }
 
-func (ar AtRule) getType() CSSType {
+func (ar *AtRule) getType() CSSType {
 	return CSSType_AtRule
 }
 
-func (ar AtRule) getChilds() *[]CSSElement {
+func (ar *AtRule) getChilds() []CSSElement {
 	return nil
 }
 
-func (ar AtRule) getValue() interface{} {
+func (ar *AtRule) getValue() interface{} {
 	return ar.Value
 }
 
-func (ar AtRule) String() (res string) {
+func (ar *AtRule) String() (res string) {
 	return "At: " + ar.Value
 }
 
-func (ar AtRule) StringCSS() (res string) {
+func (ar *AtRule) StringCSS() (res string) {
 	return ar.Value + ";\n"
 }
 
@@ -170,7 +176,7 @@ type CSSElement interface {
 	//Получение типа
 	getType() CSSType
 	//Получение потомков
-	getChilds() *[]CSSElement
+	getChilds() []CSSElement
 	//Получение значения - для элементов, у которых оно есть
 	getValue() interface{}
 	//Строковый вывод значения

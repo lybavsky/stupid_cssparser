@@ -12,12 +12,12 @@ func Parse(str string) (styleSheet StyleSheet, err error) {
 	}
 
 	styleSheet = StyleSheet{}
-	styleSheet.Model = cssStruct
+	styleSheet.Model = *cssStruct
 	return styleSheet, nil
 }
 
-func ParseCSSStruct(string_css string) (cssStruct CSSStruct, err error) {
-	curr_struct := CSSStruct{}
+func ParseCSSStruct(string_css string) (cssStruct *CSSStruct, err error) {
+	curr_struct := &(CSSStruct{Selector: "init"})
 
 	//Сразу сделаем trim
 	string_css = strings.Trim(string_css, " \r\n")
@@ -97,7 +97,7 @@ func ParseCSSStruct(string_css string) (cssStruct CSSStruct, err error) {
 		if inside_string == 0 && cur_rune == '}' {
 			inside_bracket--
 			if inside_bracket < 0 {
-				return CSSStruct{}, errors.New("Failed parse css - negative number of strings")
+				return nil, errors.New("Failed parse css - negative number of strings")
 			}
 
 		}
@@ -112,34 +112,35 @@ func ParseCSSStruct(string_css string) (cssStruct CSSStruct, err error) {
 					strings.HasPrefix(string(curr_block), "@supports") ||
 					strings.HasPrefix(string(curr_block), "@document") {
 					cssStr, err := parseCSSStruct(curr_block)
-					cssStr.Parent = &curr_struct
+					cssStr.Parent = curr_struct
 
 					if err != nil {
-						return CSSStruct{}, errors.New("Error while parse atInherited " + string(curr_block) + ": " + err.Error())
+						return nil, errors.New("Error while parse atInherited " + string(curr_block) + ": " + err.Error())
 					}
 					cssElements = append(cssElements, cssStr)
 				} else if strings.HasPrefix(string(curr_block), "@import") {
 					imp, err := parseImport(curr_block)
-					imp.Parent = &curr_struct
+					imp.Parent = curr_struct
 					if err != nil {
-						return CSSStruct{}, errors.New("Error while parse import " + string(curr_block) + ": " + err.Error())
+						return nil, errors.New("Error while parse import " + string(curr_block) + ": " + err.Error())
 					}
-					cssElements = append(cssElements, imp)
+					cssElements = append(cssElements, &imp)
 				} else {
 					at, err := parseAt(curr_block)
-					at.Parent = &curr_struct
+					at.Parent = curr_struct
 					if err != nil {
-						return CSSStruct{}, errors.New("Error while parse at " + string(curr_block) + ": " + err.Error())
+						return nil, errors.New("Error while parse at " + string(curr_block) + ": " + err.Error())
 					}
-					cssElements = append(cssElements, at)
+					cssElements = append(cssElements, &at)
 				}
 			} else {
 				ruleSet, err := parseRuleSet(curr_block)
-				ruleSet.Parent = &curr_struct
+				ruleSet.Parent = curr_struct
 				if err != nil {
-					return CSSStruct{}, errors.New("Error while parse ruleSet " + string(curr_block) + ": " + err.Error())
+					return nil, errors.New("Error while parse ruleSet " + string(curr_block) + ": " + err.Error())
 				}
 				//log.Println(ruleSet)
+				//TODO: Видимо, тут что-то ломается
 				cssElements = append(cssElements, ruleSet)
 
 			}
@@ -150,7 +151,7 @@ func ParseCSSStruct(string_css string) (cssStruct CSSStruct, err error) {
 	}
 
 	curr_struct.Selector = ""
-	curr_struct.Childs = &cssElements
+	curr_struct.Childs = cssElements
 	curr_struct.Parent = nil
 
 	return curr_struct, nil
@@ -183,9 +184,9 @@ func parseImport(runes []rune) (imp Import, err error) {
 	return Import{Value: tmp_url}, nil
 }
 
-func parseRuleSet(runes []rune) (block RuleSet, err error) {
+func parseRuleSet(runes []rune) (block *RuleSet, err error) {
 
-	curr_ruleset := RuleSet{}
+	curr_ruleset := &RuleSet{}
 
 	rules := make([]*Rule, 0)
 
@@ -194,7 +195,7 @@ func parseRuleSet(runes []rune) (block RuleSet, err error) {
 	br_idx := strings.Index(tmp_block, "{")
 
 	if br_idx == -1 {
-		return RuleSet{}, errors.New("Can not find left bracket on css block")
+		return nil, errors.New("Can not find left bracket on css block")
 	}
 
 	sel := strings.Trim(tmp_block[:br_idx], " ")
@@ -202,7 +203,7 @@ func parseRuleSet(runes []rune) (block RuleSet, err error) {
 	lbr_idx := strings.LastIndex(tmp_block, "}")
 
 	if lbr_idx == -1 {
-		return RuleSet{}, errors.New("Can not find right bracket on css block")
+		return nil, errors.New("Can not find right bracket on css block")
 	}
 
 	cont := strings.Trim(tmp_block[br_idx+1:lbr_idx], " ;")
@@ -212,10 +213,11 @@ func parseRuleSet(runes []rune) (block RuleSet, err error) {
 	for i, r := range []rune(cont) {
 		if inside_string == 0 && r == ';' {
 			rule, err := parseRule(buff)
+			rule.Parent = curr_ruleset
 			if err != nil {
-				return RuleSet{}, errors.New("Rule error: " + err.Error())
+				return nil, errors.New("Rule error: " + err.Error())
 			}
-			rule.Parent = &curr_ruleset
+			rule.Parent = curr_ruleset
 			rules = append(rules, &rule)
 
 			buff = []rune{}
@@ -230,10 +232,10 @@ func parseRuleSet(runes []rune) (block RuleSet, err error) {
 
 		if i == len(cont)-1 {
 			rule, err := parseRule(buff)
-			rule.Parent = &curr_ruleset
+			rule.Parent = curr_ruleset
 
 			if err != nil {
-				return RuleSet{}, errors.New("Rule error: " + err.Error())
+				return nil, errors.New("Rule error: " + err.Error())
 			}
 			rules = append(rules, &rule)
 		}
@@ -244,7 +246,7 @@ func parseRuleSet(runes []rune) (block RuleSet, err error) {
 	return curr_ruleset, nil
 }
 
-func parseCSSStruct(runes []rune) (cssStruct CSSStruct, err error) {
+func parseCSSStruct(runes []rune) (cssStruct *CSSStruct, err error) {
 	//fmt.Println("CSSStruct: ", string(runes))
 
 	tmp_block := string(runes)
@@ -252,7 +254,7 @@ func parseCSSStruct(runes []rune) (cssStruct CSSStruct, err error) {
 	br_idx := strings.Index(tmp_block, "{")
 
 	if br_idx == -1 {
-		return CSSStruct{}, errors.New("Can not find left bracket on css block")
+		return nil, errors.New("Can not find left bracket on css block")
 	}
 
 	sel := strings.Trim(tmp_block[:br_idx], " ")
@@ -260,7 +262,7 @@ func parseCSSStruct(runes []rune) (cssStruct CSSStruct, err error) {
 	lbr_idx := strings.LastIndex(tmp_block, "}")
 
 	if lbr_idx == -1 {
-		return CSSStruct{}, errors.New("Can not find right bracket on css block")
+		return nil, errors.New("Can not find right bracket on css block")
 	}
 
 	cont := strings.Trim(tmp_block[br_idx+1:lbr_idx], " ;")

@@ -5,11 +5,10 @@ import (
 	"git.ash.lt/allrss/cssparser/parser"
 	"io/ioutil"
 	"log"
-	"reflect"
 )
 
 func main() {
-	bs, err := ioutil.ReadFile("./test.css")
+	bs, err := ioutil.ReadFile("./test2.css")
 	if err != nil {
 		log.Fatal("error while read test.css ", err)
 	}
@@ -20,16 +19,12 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	//fmt.Println(style)
-
 	style.FindByKey("color", func(rule *parser.Rule) {
-		rule.Value = "black"
-		rule.Parent.Rules = []*parser.Rule{}
-		fmt.Println(reflect.TypeOf(rule.Parent))
+		//rule.Value = "blabla"
 		//rule.Delete()
 	})
 
-	//fmt.Println(style.StringCSS())
+	fmt.Println(style.StringCSS())
 
 	//fmt.Println(style)
 
