@@ -20,6 +20,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="271ded00-5c99-493a-b3bb-a6d0718aadc0" name="Default Changelist" comment="parser, i think, done">
+      <change afterPath="$PROJECT_DIR$/parser/const.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/tools.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/parser/parser.go" beforeDir="false" afterPath="$PROJECT_DIR$/parser/parser.go" afterDir="false" />
@@ -53,7 +55,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="TEXT" />
     <property name="go.import.settings.migrated" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/main/main.go" />
+    <property name="last_opened_file_path" value="$USER_HOME$/downloads/Telegram Desktop/header.tpl" />
   </component>
   <component name="RunManager">
     <configuration name="go build git.ash.lt/allrss/cssparser/main" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
@@ -92,26 +94,26 @@
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
     <state x="418" y="211" width="1084" height="782" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1612652485968" />
-    <state x="743" y="323" width="434" height="488" key="FileChooserDialogImpl" timestamp="1612391637078">
+    <state x="743" y="323" width="434" height="488" key="FileChooserDialogImpl" timestamp="1612977317213">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state x="743" y="323" width="434" height="488" key="FileChooserDialogImpl/0.27.1920.1053@0.27.1920.1053" timestamp="1612391637078" />
-    <state width="1878" height="257" key="GridCell.Tab.0.bottom" timestamp="1612652505236">
+    <state x="743" y="323" width="434" height="488" key="FileChooserDialogImpl/0.27.1920.1053@0.27.1920.1053" timestamp="1612977317213" />
+    <state width="1878" height="277" key="GridCell.Tab.0.bottom" timestamp="1612991108148">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state width="1878" height="257" key="GridCell.Tab.0.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1612652505236" />
-    <state width="1878" height="257" key="GridCell.Tab.0.center" timestamp="1612652505236">
+    <state width="1878" height="277" key="GridCell.Tab.0.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1612991108148" />
+    <state width="1878" height="277" key="GridCell.Tab.0.center" timestamp="1612991108147">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state width="1878" height="257" key="GridCell.Tab.0.center/0.27.1920.1053@0.27.1920.1053" timestamp="1612652505236" />
-    <state width="1878" height="257" key="GridCell.Tab.0.left" timestamp="1612652505236">
+    <state width="1878" height="277" key="GridCell.Tab.0.center/0.27.1920.1053@0.27.1920.1053" timestamp="1612991108147" />
+    <state width="1878" height="277" key="GridCell.Tab.0.left" timestamp="1612991108147">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state width="1878" height="257" key="GridCell.Tab.0.left/0.27.1920.1053@0.27.1920.1053" timestamp="1612652505236" />
-    <state width="1878" height="257" key="GridCell.Tab.0.right" timestamp="1612652505236">
+    <state width="1878" height="277" key="GridCell.Tab.0.left/0.27.1920.1053@0.27.1920.1053" timestamp="1612991108147" />
+    <state width="1878" height="277" key="GridCell.Tab.0.right" timestamp="1612991108147">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
-    <state width="1878" height="257" key="GridCell.Tab.0.right/0.27.1920.1053@0.27.1920.1053" timestamp="1612652505236" />
+    <state width="1878" height="277" key="GridCell.Tab.0.right/0.27.1920.1053@0.27.1920.1053" timestamp="1612991108147" />
     <state x="555" y="289" width="810" height="532" key="Vcs.Push.Dialog.v2" timestamp="1612566309374">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>

@@ -5,7 +5,20 @@ import (
 	"strings"
 )
 
-func Parse(string_css string) (cssStruct CSSStruct, err error) {
+func Parse(str string) (styleSheet StyleSheet, err error) {
+	cssStruct, err := ParseCSSStruct(str)
+	if err != nil {
+		return StyleSheet{}, err
+	}
+
+	styleSheet = StyleSheet{}
+	styleSheet.Model = cssStruct
+	return styleSheet, nil
+}
+
+func ParseCSSStruct(string_css string) (cssStruct CSSStruct, err error) {
+	curr_struct := CSSStruct{}
+
 	//Сразу сделаем trim
 	string_css = strings.Trim(string_css, " \r\n")
 
@@ -91,7 +104,6 @@ func Parse(string_css string) (cssStruct CSSStruct, err error) {
 
 		if (inside_string == 0 && cur_rune == '}' && inside_bracket == 0) ||
 			(inside_bracket == 0 && cur_rune == ';') {
-			//fmt.Println("RuleSet: ", string(curr_block))
 
 			curr_block = []rune(strings.Trim(string(curr_block), " "))
 
@@ -100,18 +112,22 @@ func Parse(string_css string) (cssStruct CSSStruct, err error) {
 					strings.HasPrefix(string(curr_block), "@supports") ||
 					strings.HasPrefix(string(curr_block), "@document") {
 					cssStr, err := parseCSSStruct(curr_block)
+					cssStr.Parent = &curr_struct
+
 					if err != nil {
 						return CSSStruct{}, errors.New("Error while parse atInherited " + string(curr_block) + ": " + err.Error())
 					}
 					cssElements = append(cssElements, cssStr)
 				} else if strings.HasPrefix(string(curr_block), "@import") {
 					imp, err := parseImport(curr_block)
+					imp.Parent = &curr_struct
 					if err != nil {
 						return CSSStruct{}, errors.New("Error while parse import " + string(curr_block) + ": " + err.Error())
 					}
 					cssElements = append(cssElements, imp)
 				} else {
 					at, err := parseAt(curr_block)
+					at.Parent = &curr_struct
 					if err != nil {
 						return CSSStruct{}, errors.New("Error while parse at " + string(curr_block) + ": " + err.Error())
 					}
@@ -119,11 +135,13 @@ func Parse(string_css string) (cssStruct CSSStruct, err error) {
 				}
 			} else {
 				ruleSet, err := parseRuleSet(curr_block)
+				ruleSet.Parent = &curr_struct
 				if err != nil {
 					return CSSStruct{}, errors.New("Error while parse ruleSet " + string(curr_block) + ": " + err.Error())
 				}
 				//log.Println(ruleSet)
 				cssElements = append(cssElements, ruleSet)
+
 			}
 
 			curr_block = []rune{}
@@ -131,23 +149,27 @@ func Parse(string_css string) (cssStruct CSSStruct, err error) {
 		}
 	}
 
-	return CSSStruct{Selector: "", Childs: cssElements}, nil
+	curr_struct.Selector = ""
+	curr_struct.Childs = &cssElements
+	curr_struct.Parent = nil
+
+	return curr_struct, nil
 }
 
 func parseAt(runes []rune) (at AtRule, err error) {
 	str := strings.Trim(string(runes), "; ")
 	//fmt.Println("At: ", string(runes))
-	return AtRule(str), nil
+	return AtRule{Value: str}, nil
 }
 func parseImport(runes []rune) (imp Import, err error) {
 	tmp_imp := string(runes)
 	space_idx := strings.Index(tmp_imp, " ")
 	if space_idx == -1 {
-		return "", errors.New("Can not parse import: no space symbol")
+		return Import{}, errors.New("Can not parse import: no space symbol")
 	}
 	tmp_url := tmp_imp[space_idx+1:]
 	if len(tmp_url) == 0 {
-		return "", errors.New("Can not parse import: no url")
+		return Import{}, errors.New("Can not parse import: no url")
 	}
 
 	if tmp_url[len(tmp_url)-1] == ';' {
@@ -158,11 +180,14 @@ func parseImport(runes []rune) (imp Import, err error) {
 
 	//fmt.Println("Import: ", tmp_url)
 
-	return Import(tmp_url), nil
+	return Import{Value: tmp_url}, nil
 }
 
 func parseRuleSet(runes []rune) (block RuleSet, err error) {
-	rules := make([]Rule, 0)
+
+	curr_ruleset := RuleSet{}
+
+	rules := make([]*Rule, 0)
 
 	tmp_block := string(runes)
 
@@ -190,7 +215,8 @@ func parseRuleSet(runes []rune) (block RuleSet, err error) {
 			if err != nil {
 				return RuleSet{}, errors.New("Rule error: " + err.Error())
 			}
-			rules = append(rules, rule)
+			rule.Parent = &curr_ruleset
+			rules = append(rules, &rule)
 
 			buff = []rune{}
 			continue
@@ -204,14 +230,18 @@ func parseRuleSet(runes []rune) (block RuleSet, err error) {
 
 		if i == len(cont)-1 {
 			rule, err := parseRule(buff)
+			rule.Parent = &curr_ruleset
+
 			if err != nil {
 				return RuleSet{}, errors.New("Rule error: " + err.Error())
 			}
-			rules = append(rules, rule)
+			rules = append(rules, &rule)
 		}
 	}
 
-	return RuleSet{Selector: sel, Rules: rules}, nil
+	curr_ruleset.Selector = sel
+	curr_ruleset.Rules = rules
+	return curr_ruleset, nil
 }
 
 func parseCSSStruct(runes []rune) (cssStruct CSSStruct, err error) {
@@ -236,7 +266,7 @@ func parseCSSStruct(runes []rune) (cssStruct CSSStruct, err error) {
 	cont := strings.Trim(tmp_block[br_idx+1:lbr_idx], " ;")
 
 	//fmt.Println("AT SEL: ", sel, ", conf: ", cont)
-	cssStruct, err = Parse(cont)
+	cssStruct, err = ParseCSSStruct(cont)
 
 	//fmt.Println("AT: ", cssStruct)
 	cssStruct.Selector = sel
